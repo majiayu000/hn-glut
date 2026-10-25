@@ -1,0 +1,60 @@
+name: Monthly update
+
+# HN posts the monthly threads on the first weekday of the month around 15:00-16:00 UTC.
+# The 3rd catches the first days; the 16th runs after the thread closes (14 days).
+on:
+  schedule:
+    - cron: "0 6 3,16 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v10
+      - run: uv sync --locked
+      - name: Restore API cache
+        uses: actions/cache@v6
+        with:
+          path: .cache
+          key: hn-cache-${{ github.run_id }}
+          restore-keys: hn-cache-
+      - name: Build dataset
+        run: uv run hn-glut build --jolts
+      - uses: actions/upload-artifact@v7
+        with:
+          name: data
+          path: data/
+
+  # Disabled until the maintainer decides to let the bot push. To enable: remove `if: false`
+  # and grant `contents: write` to this job.
+  commit:
+    if: false
+    needs: update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: data
+          path: data/
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet && exit 0
+          git commit -s -m "data: monthly update $(date -u +%Y-%m-%d)"
+          git push

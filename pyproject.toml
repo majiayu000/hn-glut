@@ -1,0 +1,21 @@
+[project]
+name = "hn-glut"
+version = "0.1.0"
+description = "How many Hacker News job seekers per job post: monthly 'Who wants to be hired?' vs 'Who is hiring?' since 2014"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.scripts]
+hn-glut = "hn_glut.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,35 @@
+{
+ "id": 901,
+ "type": "story",
+ "author": "whoishiring",
+ "children": [
+  {
+   "id": 90100,
+   "author": "user0",
+   "text": "Acme | Senior Rust engineer | REMOTE<p>We use Rust, Python and Postgres.",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90101,
+   "author": "user1",
+   "text": "Beta Corp | ML engineer | NYC<p>PyTorch, LLMs, AWS",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90102,
+   "author": "user2",
+   "text": "Gamma | Frontend | SF<p>React and TypeScript",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90199,
+   "author": null,
+   "text": null,
+   "children": [],
+   "type": "comment"
+  }
+ ]
+}

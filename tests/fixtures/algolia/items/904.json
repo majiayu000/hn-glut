@@ -1,0 +1,49 @@
+{
+ "id": 904,
+ "type": "story",
+ "author": "whoishiring",
+ "children": [
+  {
+   "id": 90400,
+   "author": "user0",
+   "text": "Technologies: Rust, C++",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90401,
+   "author": "user1",
+   "text": "Technologies: Python/Go",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90402,
+   "author": "user2",
+   "text": "Technologies: React, JavaScript",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90403,
+   "author": "user3",
+   "text": "Technologies: LLM agents, Python",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90404,
+   "author": "user4",
+   "text": "Technologies: SQL, dbt",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90499,
+   "author": null,
+   "text": null,
+   "children": [],
+   "type": "comment"
+  }
+ ]
+}

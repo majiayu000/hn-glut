@@ -1,0 +1,56 @@
+{
+ "id": 906,
+ "type": "story",
+ "author": "whoishiring",
+ "children": [
+  {
+   "id": 90600,
+   "author": "user0",
+   "text": "Technologies: Rust, Elixir",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90601,
+   "author": "user1",
+   "text": "Technologies: Python, ML",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90602,
+   "author": "user2",
+   "text": "Technologies: React",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90603,
+   "author": "user3",
+   "text": "Technologies: AI agents, agentic workflows",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90604,
+   "author": "user4",
+   "text": "Technologies: Swift, iOS",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90605,
+   "author": "user5",
+   "text": "Technologies: Go, Rust",
+   "children": [],
+   "type": "comment"
+  },
+  {
+   "id": 90699,
+   "author": null,
+   "text": null,
+   "children": [],
+   "type": "comment"
+  }
+ ]
+}

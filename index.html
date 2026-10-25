@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HN Job Glut</title>
+<meta name="description" content="How many people post in Hacker News 'Who wants to be hired?' for every post in 'Who is hiring?', every month since 2014.">
+<meta property="og:title" content="HN Job Glut: job seekers per job post on Hacker News">
+<meta property="og:description" content="Monthly 'Who wants to be hired?' ÷ 'Who is hiring?' top-level comments since 2014, by skill, next to US JOLTS.">
+<meta property="og:image" content="https://majiayu000.github.io/hn-glut/docs/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23ff6600'/%3E%3Cpath d='M3 12 L6 8 L9 9 L13 3' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --surface: #fcfcfb;
+  --surface-2: #f3f2ef;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #7a7974;
+  --grid: #e4e3df;
+  --axis: #b9b8b2;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --accent: #ff6600;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface: #1a1a19;
+    --surface-2: #242423;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #8f8e88;
+    --grid: #33332f;
+    --axis: #55544f;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: #1a1a19;
+  --surface-2: #242423;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #8f8e88;
+  --grid: #33332f;
+  --axis: #55544f;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--surface); color: var(--text-primary);
+  font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 15px; font-weight: 600; margin: 0 0 24px; color: var(--text-secondary); letter-spacing: .02em; }
+h1 b { color: var(--accent); }
+h2 { font-size: 18px; margin: 48px 0 4px; }
+p.sub { margin: 0 0 12px; color: var(--text-secondary); font-size: 14px; }
+.hero { display: flex; flex-wrap: wrap; gap: 8px 32px; align-items: baseline; }
+.hero .num { font-size: clamp(64px, 14vw, 112px); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.hero .what { max-width: 520px; font-size: 18px; color: var(--text-secondary); }
+.hero .what strong { color: var(--text-primary); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 16px 0 0; font-size: 14px; color: var(--text-secondary); }
+.facts span b { color: var(--text-primary); font-variant-numeric: tabular-nums; }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { fill: var(--text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.chart .label { fill: var(--text-secondary); font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text-secondary); margin: 8px 0; }
+.legend i { display: inline-block; width: 16px; height: 2px; vertical-align: middle; margin-right: 6px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface-2); color: var(--text-primary);
+  border: 1px solid var(--grid); border-radius: 6px; padding: 6px 8px; font-size: 13px; line-height: 1.4;
+  white-space: nowrap; display: none; box-shadow: 0 2px 8px rgba(0,0,0,.12); z-index: 2; }
+.tip .k { color: var(--text-secondary); }
+.note { font-size: 13px; color: var(--text-muted); }
+details { margin-top: 32px; font-size: 14px; }
+summary { cursor: pointer; color: var(--text-secondary); }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; font-variant-numeric: tabular-nums; margin-top: 8px; }
+th, td { padding: 3px 10px; text-align: right; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; }
+a { color: var(--series-1); }
+footer { margin-top: 48px; font-size: 13px; color: var(--text-muted); }
+#error { color: #e34948; }
+</style>
+</head>
+<body>
+<main>
+<h1><b>hn-glut</b> · Hacker News job seekers per job post</h1>
+
+<section class="hero" aria-live="polite">
+  <div class="num" id="hero-num">–</div>
+  <div class="what" id="hero-what">Loading…</div>
+</section>
+<div class="facts" id="facts"></div>
+<p id="error"></p>
+
+<h2>Seekers per job post, every month since July 2014</h2>
+<p class="sub">Top-level comments in “Who wants to be hired?” ÷ top-level comments in “Who is hiring?”. Above the dashed line, job seekers outnumber job posts.</p>
+<div class="legend" id="legend-ratio"></div>
+<div class="chart" id="chart-ratio"></div>
+
+<h2>US: job openings per unemployed person</h2>
+<p class="sub">JOLTS job openings ÷ CPS unemployed (both seasonally adjusted, via FRED). Above 1, there are more openings than unemployed people. Same months as above.</p>
+<div class="chart" id="chart-jolts"></div>
+
+<h2>Seekers per job post, by skill</h2>
+<p class="sub" id="skills-sub">Visible comments that mention the skill, last three months pooled.</p>
+<div class="chart" id="chart-skills"></div>
+<p class="note">Seeker posts usually list a long “Technologies:” stack, job posts don’t, so most skills sit above the overall line. Compare skills with each other, not with the overall ratio. Matching is one regular expression per skill (<a href="https://github.com/majiayu000/hn-glut/blob/main/src/hn_glut/skills.py">skills.py</a>).</p>
+
+<details>
+  <summary>Table: every month</summary>
+  <div class="tablewrap"><table id="table"></table></div>
+</details>
+
+<footer>
+  <p><b>All comments</b> counts every top-level comment id Hacker News’ Firebase API lists for the thread, including ones later deleted by their author or marked dead. <b>Visible today</b> counts only the ones you can still read (HN Algolia API). Old threads lose visible comments over the years as people delete them, so the long-run comparison uses all comments. Months younger than 14 days are still open and shown hollow.</p>
+  <p>Data: <a href="data/monthly.csv">monthly.csv</a> · <a href="data/skills.csv">skills.csv</a> · <a href="data/jolts.csv">jolts.csv</a> · <a href="data/hn-glut.json">hn-glut.json</a> · <span id="generated"></span><br>
+  Code and method: <a href="https://github.com/majiayu000/hn-glut">github.com/majiayu000/hn-glut</a> (MIT). Only aggregate counts are published; no comment text, usernames or contact details.</p>
+</footer>
+</main>
+
+<script>
+"use strict";
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent) => {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+  if (parent) parent.appendChild(n);
+  return n;
+};
+const monthIndex = m => { const [y, mo] = m.split("-").map(Number); return y * 12 + mo - 1; };
+const monthLabel = m => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5, 7) - 1, 1))
+  .toLocaleString("en-US", { month: "short", year: "numeric", timeZone: "UTC" });
+const fmt = v => v == null ? "–" : v.toFixed(2);
+
+function niceMax(v) {
+  const steps = [0.5, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10, 12, 15, 20];
+  return steps.find(s => s >= v * 1.05) ?? Math.ceil(v);
+}
+
+function tooltip(container) {
+  const t = document.createElement("div");
+  t.className = "tip";
+  container.appendChild(t);
+  return {
+    show(html, x, y) {
+      t.innerHTML = html;
+      t.style.display = "block";
+      const w = t.offsetWidth, cw = container.clientWidth;
+      t.style.left = Math.max(0, Math.min(cw - w, x - w / 2)) + "px";
+      t.style.top = (y - t.offsetHeight - 12) + "px";
+    },
+    hide() { t.style.display = "none"; },
+  };
+}
+
+// Line chart over months. series: [{key, label, color, values: Map(month -> value)}]
+function lineChart(container, months, series, { height = 320, ref = null, open = new Set(), tipRows }) {
+  container.innerHTML = "";
+  const W = Math.max(320, container.clientWidth), H = height;
+  const m = { t: 12, r: 12, b: 28, l: 36 };
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }, container);
+  const x0 = monthIndex(months[0]), x1 = monthIndex(months[months.length - 1]);
+  const all = series.flatMap(s => [...s.values.values()]).filter(v => v != null);
+  const yMax = niceMax(Math.max(...all, ref ?? 0));
+  const Xi = i => m.l + (i - x0) / Math.max(1, x1 - x0) * (W - m.l - m.r);
+  const Y = v => H - m.b - v / yMax * (H - m.t - m.b);
+  const xs = mo => Xi(monthIndex(mo));
+
+  const ticks = yMax <= 2 ? 0.5 : yMax <= 6 ? 1 : 2;
+  for (let v = 0; v <= yMax + 1e-9; v += ticks) {
+    el("line", { x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v), stroke: "var(--grid)", "stroke-width": 1 }, svg);
+    el("text", { x: m.l - 6, y: Y(v) + 4, "text-anchor": "end" }, svg).textContent = +v.toFixed(1);
+  }
+  const firstYear = +months[0].slice(0, 4), lastYear = +months[months.length - 1].slice(0, 4);
+  const every = W < 560 ? 4 : 2;
+  for (let yr = firstYear + 1; yr <= lastYear; yr++) {
+    if ((yr - firstYear - 1) % every) continue;
+    const xx = xs(`${yr}-01`);
+    el("line", { x1: xx, x2: xx, y1: H - m.b, y2: H - m.b + 4, stroke: "var(--axis)" }, svg);
+    el("text", { x: xx, y: H - m.b + 18, "text-anchor": "middle" }, svg).textContent = yr;
+  }
+  el("line", { x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b, stroke: "var(--axis)" }, svg);
+  if (ref != null) {
+    el("line", { x1: m.l, x2: W - m.r, y1: Y(ref), y2: Y(ref), stroke: "var(--text-muted)",
+      "stroke-dasharray": "4 4", "stroke-width": 1 }, svg);
+  }
+
+  for (const s of series) {
+    let d = "", pen = false;
+    for (const mo of months) {
+      const v = s.values.get(mo);
+      if (v == null || open.has(mo)) { pen = false; continue; }
+      d += (pen ? "L" : "M") + xs(mo).toFixed(1) + "," + Y(v).toFixed(1);
+      pen = true;
+    }
+    el("path", { d, fill: "none", stroke: s.color, "stroke-width": 2, "stroke-linejoin": "round" }, svg);
+    for (const mo of open) {
+      const v = s.values.get(mo);
+      if (v == null) continue;
+      el("circle", { cx: xs(mo), cy: Y(v), r: 4, fill: "var(--surface)", stroke: s.color, "stroke-width": 2 }, svg);
+    }
+  }
+  // direct label on the last complete point of the first series
+  const s0 = series[0];
+  const lastDone = [...months].reverse().find(mo => s0.values.get(mo) != null && !open.has(mo));
+  if (lastDone) {
+    const v = s0.values.get(lastDone);
+    el("circle", { cx: xs(lastDone), cy: Y(v), r: 4, fill: s0.color, stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    el("text", { x: xs(lastDone) - 8, y: Y(v) - 10, "text-anchor": "end", class: "label" }, svg)
+      .textContent = `${monthLabel(lastDone)}: ${fmt(v)}`;
+  }
+
+  // hover: crosshair + tooltip
+  const cross = el("line", { y1: m.t, y2: H - m.b, stroke: "var(--axis)", "stroke-width": 1, visibility: "hidden" }, svg);
+  const dots = series.map(s => el("circle", { r: 4, fill: s.color, stroke: "var(--surface)", "stroke-width": 2, visibility: "hidden" }, svg));
+  const hit = el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: "transparent" }, svg);
+  const tip = tooltip(container);
+  const move = ev => {
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) * W / r.width;
+    const idx = Math.round(x0 + (px - m.l) / (W - m.l - m.r) * (x1 - x0));
+    const mo = months[Math.max(0, Math.min(months.length - 1, idx - x0))];
+    const xx = xs(mo);
+    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx); cross.setAttribute("visibility", "visible");
+    let topY = H;
+    series.forEach((s, i) => {
+      const v = s.values.get(mo);
+      if (v == null) { dots[i].setAttribute("visibility", "hidden"); return; }
+      dots[i].setAttribute("cx", xx); dots[i].setAttribute("cy", Y(v)); dots[i].setAttribute("visibility", "visible");
+      topY = Math.min(topY, Y(v));
+    });
+    tip.show(tipRows(mo), xx * r.width / W, Math.min(topY, H - m.b) * r.height / H);
+  };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => {
+    tip.hide(); cross.setAttribute("visibility", "hidden"); dots.forEach(d => d.setAttribute("visibility", "hidden"));
+  });
+}
+
+function barChart(container, rows, { overall }) {
+  container.innerHTML = "";
+  const W = Math.max(320, container.clientWidth), bh = 18, gap = 6, m = { t: 34, r: 48, b: 24, l: 120 };
+  const H = m.t + m.b + rows.length * (bh + gap);
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }, container);
+  const max = niceMax(Math.max(...rows.map(r => r.value), overall ?? 0));
+  const X = v => m.l + v / max * (W - m.l - m.r);
+  const step = max <= 6 ? 1 : max <= 12 ? 2 : 5;
+  for (let v = 0; v <= max + 1e-9; v += step) {
+    el("line", { x1: X(v), x2: X(v), y1: m.t, y2: H - m.b, stroke: "var(--grid)" }, svg);
+    el("text", { x: X(v), y: H - m.b + 16, "text-anchor": "middle" }, svg).textContent = v;
+  }
+  const tip = tooltip(container);
+  rows.forEach((r, i) => {
+    const y = m.t + i * (bh + gap);
+    el("text", { x: m.l - 8, y: y + bh - 4, "text-anchor": "end", class: "label" }, svg).textContent = r.skill;
+    const w = Math.max(1, X(r.value) - m.l);
+    el("path", { d: `M${m.l},${y} h${w - 4} a4,4 0 0 1 4,4 v${bh - 8} a4,4 0 0 1 -4,4 h${-(w - 4)} z`, fill: "var(--series-1)" }, svg);
+    el("text", { x: X(r.value) + 6, y: y + bh - 4 }, svg).textContent = fmt(r.value);
+    const hit = el("rect", { x: 0, y: y - gap / 2, width: W, height: bh + gap, fill: "transparent" }, svg);
+    const show = () => {
+      const b = svg.getBoundingClientRect();
+      tip.show(`<b>${r.skill}</b><br><span class="k">seeker posts</span> ${r.seeking} · <span class="k">job posts</span> ${r.hiring}<br><span class="k">seekers per job</span> ${fmt(r.value)}`,
+        X(r.value) * b.width / W, y * b.height / H);
+    };
+    hit.addEventListener("pointermove", show);
+    hit.addEventListener("pointerdown", show);
+    hit.addEventListener("pointerleave", () => tip.hide());
+  });
+  if (overall != null) {
+    el("line", { x1: X(overall), x2: X(overall), y1: m.t - 8, y2: H - m.b, stroke: "var(--text-muted)", "stroke-dasharray": "4 4" }, svg);
+    el("text", { x: X(overall), y: m.t - 16, "text-anchor": "middle", class: "label" }, svg).textContent = `overall ${fmt(overall)}`;
+  }
+}
+
+async function main() {
+  let doc;
+  try {
+    const res = await fetch("data/hn-glut.json", { cache: "no-cache" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    doc = await res.json();
+  } catch (e) {
+    document.getElementById("error").textContent = `Could not load data/hn-glut.json (${e.message}). Serve this folder over HTTP.`;
+    document.getElementById("hero-what").textContent = "";
+    return;
+  }
+  const rows = doc.monthly.filter(r => r.ratio_all != null);
+  const byMonth = new Map(doc.monthly.map(r => [r.month, r]));
+  const months = rows.map(r => r.month);
+  const open = new Set(rows.filter(r => !r.complete).map(r => r.month));
+  const latest = doc.summary.latest_complete, top = doc.summary.highest;
+  const rank = top.findIndex(r => r.month === latest.month);
+
+  document.getElementById("hero-num").textContent = fmt(latest.ratio_all);
+  document.getElementById("hero-what").innerHTML =
+    `job seekers for every job post in Hacker News’ <strong>${monthLabel(latest.month)}</strong> threads ` +
+    `(${latest.seeking_all.toLocaleString()} “Who wants to be hired?” comments vs ${latest.hiring_all.toLocaleString()} “Who is hiring?”).` +
+    (rank >= 0 ? ` <strong>${rank === 0 ? "The highest" : "The " + ["", "2nd", "3rd", "4th", "5th"][rank] + " highest"} month since 2014.</strong>` : "");
+  const pre = rows.find(r => r.month === "2021-" + latest.month.slice(5));
+  const facts = [
+    `Highest: <b>${monthLabel(top[0].month)} ${fmt(top[0].ratio_all)}</b>`,
+    pre ? `Same month 2021: <b>${fmt(pre.ratio_all)}</b>` : "",
+    `Visible-today definition: <b>${fmt(latest.ratio_visible)}</b>`,
+    doc.summary.in_progress && doc.summary.in_progress.ratio_all != null
+      ? `${monthLabel(doc.summary.in_progress.month)} so far: <b>${fmt(doc.summary.in_progress.ratio_all)}</b> (thread still open)` : "",
+  ].filter(Boolean);
+  document.getElementById("facts").innerHTML = facts.map(f => `<span>${f}</span>`).join("");
+  document.getElementById("generated").textContent = `generated ${doc.generated_at}`;
+
+  const series = [
+    { label: "All comments", color: "var(--series-1)", values: new Map(rows.map(r => [r.month, r.ratio_all])) },
+    { label: "Visible today", color: "var(--series-2)", values: new Map(rows.map(r => [r.month, r.ratio_visible])) },
+  ];
+  document.getElementById("legend-ratio").innerHTML = series
+    .map(s => `<span><i style="background:${s.color}"></i>${s.label}</span>`).join("") +
+    `<span><i style="border-top:1px dashed var(--text-muted);height:0"></i>1 seeker per job post</span>`;
+  const jolts = new Map((doc.jolts || []).map(r => [r.month, r.openings_per_unemployed]));
+  const ratioTip = mo => {
+    const r = byMonth.get(mo);
+    return `<b>${monthLabel(mo)}</b>${open.has(mo) ? " (open)" : ""}<br>` +
+      `<span class="k">all</span> ${r.seeking_all} / ${r.hiring_all} = <b>${fmt(r.ratio_all)}</b><br>` +
+      `<span class="k">visible</span> ${r.seeking_visible ?? "–"} / ${r.hiring_visible ?? "–"} = ${fmt(r.ratio_visible)}` +
+      (jolts.has(mo) ? `<br><span class="k">US openings per unemployed</span> ${fmt(jolts.get(mo))}` : "");
+  };
+
+  const draw = () => {
+    lineChart(document.getElementById("chart-ratio"), months, series, { ref: 1, open, tipRows: ratioTip });
+    if (jolts.size) {
+      lineChart(document.getElementById("chart-jolts"), months,
+        [{ label: "Openings per unemployed", color: "var(--series-3)", values: jolts }],
+        { height: 180, ref: 1, tipRows: mo => `<b>${monthLabel(mo)}</b><br><span class="k">openings per unemployed</span> ${fmt(jolts.get(mo))}` });
+    } else {
+      document.getElementById("chart-jolts").innerHTML = '<p class="note">No JOLTS data in this build.</p>';
+    }
+    const last3 = doc.skills.filter(s => s.month === latest.month && s.seekers_per_job_3m != null);
+    const win = rows.slice(Math.max(0, rows.indexOf(rows.find(r => r.month === latest.month)) - 2),
+      rows.indexOf(rows.find(r => r.month === latest.month)) + 1);
+    const overall = win.reduce((a, r) => a + r.seeking_visible, 0) / win.reduce((a, r) => a + r.hiring_visible, 0);
+    document.getElementById("skills-sub").textContent =
+      `Visible comments that mention the skill, ${monthLabel(win[0].month)} – ${monthLabel(latest.month)} pooled. Skills with fewer than 20 job-post mentions are left out.`;
+    const bars = last3.filter(s => s.hiring_hits_3m >= 20)
+      .map(s => ({ skill: s.skill, value: s.seekers_per_job_3m, hiring: s.hiring_hits_3m, seeking: s.seeking_hits_3m }))
+      .sort((a, b) => b.value - a.value);
+    barChart(document.getElementById("chart-skills"), bars, { overall });
+  };
+  draw();
+  let t;
+  window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(draw, 150); });
+
+  const cols = ["month", "hiring_all", "seeking_all", "ratio_all", "hiring_visible", "seeking_visible", "ratio_visible"];
+  const head = ["Month", "Hiring", "Seeking", "Ratio", "Hiring (visible)", "Seeking (visible)", "Ratio (visible)"];
+  document.getElementById("table").innerHTML =
+    `<thead><tr>${head.map(h => `<th>${h}</th>`).join("")}<th>US openings / unemployed</th></tr></thead><tbody>` +
+    [...rows].reverse().map(r => `<tr>${cols.map(c => `<td>${r[c] ?? "–"}${c === "month" && !r.complete ? " (open)" : ""}</td>`).join("")}<td>${jolts.has(r.month) ? fmt(jolts.get(r.month)) : "–"}</td></tr>`).join("") +
+    "</tbody>";
+}
+main();
+</script>
+</body>
+</html>

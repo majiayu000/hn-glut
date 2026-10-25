@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>hn-glut social preview</title>
+<!-- Rendered to docs/social-preview.png by tools/render-preview.sh (1280x640). -->
+<style>
+html, body { margin: 0; width: 1280px; height: 640px; background: #fcfcfb; color: #0b0b0b;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.wrap { padding: 56px 64px; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; }
+.top { font-size: 26px; color: #52514e; font-weight: 600; }
+.top b { color: #ff6600; }
+.row { display: flex; align-items: flex-end; gap: 48px; margin-top: 24px; }
+.num { font-size: 200px; font-weight: 800; line-height: .85; letter-spacing: -6px; }
+.what { font-size: 34px; line-height: 1.25; color: #52514e; padding-bottom: 8px; max-width: 640px; }
+.what strong { color: #0b0b0b; }
+svg { margin-top: auto; }
+svg text { font-size: 18px; fill: #7a7974; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><b>hn-glut</b> · Hacker News “Who wants to be hired?” ÷ “Who is hiring?”</div>
+  <div class="row"><div class="num" id="num"></div><div class="what" id="what"></div></div>
+  <svg id="spark" width="1152" height="210" viewBox="0 0 1152 210"></svg>
+</div>
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const el = (t, a, p) => { const n = document.createElementNS(NS, t); for (const k in a) n.setAttribute(k, a[k]); p.appendChild(n); return n; };
+fetch("../data/hn-glut.json").then(r => r.json()).then(doc => {
+  const latest = doc.summary.latest_complete;
+  const label = m => new Date(Date.UTC(+m.slice(0, 4), +m.slice(5) - 1)).toLocaleString("en-US", { month: "long", year: "numeric", timeZone: "UTC" });
+  document.getElementById("num").textContent = latest.ratio_all.toFixed(2);
+  const top = doc.summary.highest[0].month === latest.month ? "the highest since 2014" :
+    `${doc.summary.highest.findIndex(r => r.month === latest.month) + 1}${["", "", "nd", "rd", "th", "th"][doc.summary.highest.findIndex(r => r.month === latest.month) + 1] || "th"} highest since 2014`;
+  document.getElementById("what").innerHTML = `job seekers per job post in <strong>${label(latest.month)}</strong>, ${top}.`;
+  const rows = doc.monthly.filter(r => r.ratio_all != null && r.complete);
+  const svg = document.getElementById("spark"), W = 1152, H = 210, b = 28;
+  const max = Math.max(...rows.map(r => r.ratio_all)) * 1.08;
+  const X = i => i / (rows.length - 1) * W, Y = v => H - b - v / max * (H - b - 8);
+  el("line", { x1: 0, x2: W, y1: Y(1), y2: Y(1), stroke: "#7a7974", "stroke-dasharray": "6 6" }, svg);
+  el("text", { x: 4, y: Y(1) - 8 }, svg).textContent = "1 seeker per job";
+  el("path", { d: rows.map((r, i) => (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(r.ratio_all).toFixed(1)).join(""),
+    fill: "none", stroke: "#2a78d6", "stroke-width": 4, "stroke-linejoin": "round" }, svg);
+  const li = rows.length - 1;
+  el("circle", { cx: X(li), cy: Y(rows[li].ratio_all), r: 8, fill: "#2a78d6", stroke: "#fcfcfb", "stroke-width": 3 }, svg);
+  for (const yr of [2015, 2018, 2021, 2024]) {
+    const i = rows.findIndex(r => r.month === `${yr}-01`);
+    if (i >= 0) el("text", { x: X(i), y: H - 4, "text-anchor": "middle" }, svg).textContent = yr;
+  }
+  document.body.dataset.ready = "1";
+});
+</script>
+</body>
+</html>
