@@ -21,7 +21,7 @@ hn-glut counts the top-level comments in every monthly `whoishiring` thread sinc
 | 2026-07 | 601 | 311 | **1.93** | 489 / 258 = 1.90 |
 | 2024-01 | 581 | 315 | **1.84** | 446 / 278 = 1.60 |
 
-Yearly averages (all comments): 2018 0.13, 2021 0.29, 2023 1.31, 2024 1.48, 2025 1.31, 2026 (Jan–Oct) 1.83. The lowest month is May 2018 at 0.07. For comparison, the US had 1.01 job openings per unemployed person in August 2026 (JOLTS ÷ CPS, preliminary).
+Yearly averages (all comments): 2018 0.13, 2021 0.29, 2023 1.31, 2024 1.48, 2025 1.31, 2026 (Jan–Oct) 1.83. The lowest month is May 2018 at 0.07. For comparison, the US had 1.06 job openings per unemployed person in September 2026 (JOLTS ÷ CPS, preliminary).
 
 Numbers from `hn-glut build --jolts` run on 2026-10-25. The October thread closes to new comments around 2026-10-15, so its count is final apart from moderation.
 
