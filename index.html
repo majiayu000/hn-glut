@@ -3,12 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HN Job Glut</title>
+<title>HN Job Glut: Hacker News job seekers per hiring post</title>
 <meta name="description" content="How many people post in Hacker News 'Who wants to be hired?' for every post in 'Who is hiring?', every month since 2014.">
 <meta property="og:title" content="HN Job Glut: job seekers per job post on Hacker News">
 <meta property="og:description" content="Monthly 'Who wants to be hired?' ÷ 'Who is hiring?' top-level comments since 2014, by skill, next to US JOLTS.">
 <meta property="og:image" content="https://majiayu000.github.io/hn-glut/docs/social-preview.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://majiayu000.github.io/hn-glut/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://majiayu000.github.io/hn-glut/">
+<meta name="twitter:title" content="HN Job Glut: Hacker News job seekers per hiring post">
+<meta name="twitter:description" content="Explore monthly Hacker News hiring and job-seeker posts since 2014, skill comparisons, downloadable data and methodology.">
+<meta name="twitter:image" content="https://majiayu000.github.io/hn-glut/docs/social-preview.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23ff6600'/%3E%3Cpath d='M3 12 L6 8 L9 9 L13 3' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
 <style>
 :root {
@@ -93,6 +99,8 @@ footer { margin-top: 48px; font-size: 13px; color: var(--text-muted); }
 <main>
 <h1><b>hn-glut</b> · Hacker News job seekers per job post</h1>
 
+<p>Explore monthly Hacker News hiring and job-seeker posts since 2014. This compares thread comments, not unique people or vacancies; it is not a measure of the whole job market. <a href="#method">Read the method and download the data</a>.</p>
+<noscript><p>Enable JavaScript for interactive charts. The <a href="data/monthly.csv">monthly CSV</a> and <a href="data/hn-glut.json">JSON dataset</a> are available without JavaScript.</p></noscript>
 <section class="hero" aria-live="polite">
   <div class="num" id="hero-num">–</div>
   <div class="what" id="hero-what">Loading…</div>
@@ -119,7 +127,7 @@ footer { margin-top: 48px; font-size: 13px; color: var(--text-muted); }
   <div class="tablewrap"><table id="table"></table></div>
 </details>
 
-<footer>
+<footer id="method">
   <p><b>All comments</b> counts every top-level comment id Hacker News’ Firebase API lists for the thread, including ones later deleted by their author or marked dead. <b>Visible today</b> counts only the ones you can still read (HN Algolia API). Old threads lose visible comments over the years as people delete them, so the long-run comparison uses all comments. Months younger than 14 days are still open and shown hollow.</p>
   <p>Data: <a href="data/monthly.csv">monthly.csv</a> · <a href="data/skills.csv">skills.csv</a> · <a href="data/jolts.csv">jolts.csv</a> · <a href="data/hn-glut.json">hn-glut.json</a> · <span id="generated"></span><br>
   Code and method: <a href="https://github.com/majiayu000/hn-glut">github.com/majiayu000/hn-glut</a> (MIT). Only aggregate counts are published; no comment text, usernames or contact details.</p>
